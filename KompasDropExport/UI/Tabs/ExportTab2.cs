@@ -151,6 +151,28 @@ namespace KompasDropExport.UI.Tabs
             UpdateQueueLabel();
         }
 
+        private void RemoveSelectedFilesFromList()
+        {
+            if (listBoxFiles.SelectedIndices.Count == 0)
+                return;
+
+            var selectedPaths = listBoxFiles.SelectedItems
+                .Cast<object>()
+                .Select(it => it?.ToString())
+                .Where(path => !string.IsNullOrWhiteSpace(path))
+                .ToList();
+
+            foreach (var path in selectedPaths)
+                _pdfArchiveMiss.Remove(path);
+
+            for (int i = listBoxFiles.SelectedIndices.Count - 1; i >= 0; i--)
+                listBoxFiles.Items.RemoveAt(listBoxFiles.SelectedIndices[i]);
+
+            listBoxFiles.Invalidate();
+            UpdateQueueLabel();
+            lblStatus.Text = $"Удалено из очереди: {selectedPaths.Count}.";
+        }
+
         private void AddFile(string path)
         {
             if (!IsSupportedKompasFile(path))
@@ -321,6 +343,7 @@ namespace KompasDropExport.UI.Tabs
                         return;
                     }
 
+                    lblStatus.Text = "Получаем открытые документы КОМПАС...";
                     var openPaths = host.GetOpenDocumentPaths();
                     AddPathsToList(openPaths);
                 }
