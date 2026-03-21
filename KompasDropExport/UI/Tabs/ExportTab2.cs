@@ -1,5 +1,4 @@
-﻿//БРАТАН, ПРОВЕРКА СВЯЗИ!
-using KompasDropExport.Domain;
+﻿using KompasDropExport.Domain;
 using KompasDropExport.Kompas;
 using KompasDropExport.Services;
 using System;
@@ -37,9 +36,6 @@ namespace KompasDropExport.UI.Tabs
 
             listBoxFiles.DragEnter += OnDragEnter;
             listBoxFiles.DragDrop += OnDragDrop;
-            listBoxFiles.KeyDown += listBoxFiles_KeyDown;
-
-
 
             // Включаем owner draw для подсветки строк
             listBoxFiles.DrawMode = DrawMode.OwnerDrawFixed;
@@ -133,8 +129,10 @@ namespace KompasDropExport.UI.Tabs
             AddPathsToList(dropped);
         }
 
-        private void AddPathsToList(IEnumerable<string> paths)
+        private int AddPathsToList(IEnumerable<string> paths)
         {
+            int before = listBoxFiles.Items.Count;
+
             foreach (var p in paths)
             {
                 if (File.Exists(p))
@@ -149,6 +147,29 @@ namespace KompasDropExport.UI.Tabs
             }
 
             UpdateQueueLabel();
+            return listBoxFiles.Items.Count - before;
+        }
+
+        private void RemoveSelectedFilesFromList()
+        {
+            if (listBoxFiles.SelectedIndices.Count == 0)
+                return;
+
+            var selectedPaths = listBoxFiles.SelectedItems
+                .Cast<object>()
+                .Select(it => it?.ToString())
+                .Where(path => !string.IsNullOrWhiteSpace(path))
+                .ToList();
+
+            foreach (var path in selectedPaths)
+                _pdfArchiveMiss.Remove(path);
+
+            for (int i = listBoxFiles.SelectedIndices.Count - 1; i >= 0; i--)
+                listBoxFiles.Items.RemoveAt(listBoxFiles.SelectedIndices[i]);
+
+            listBoxFiles.Invalidate();
+            UpdateQueueLabel();
+            lblStatus.Text = $"Удалено из очереди: {selectedPaths.Count}.";
         }
 
         private void AddFile(string path)
@@ -311,8 +332,6 @@ namespace KompasDropExport.UI.Tabs
         {
             try
             {
-                int before = listBoxFiles.Items.Count;
-
                 using (var host = new KompasHost())
                 {
                     if (!host.TryAttachToRunning())
@@ -321,14 +340,29 @@ namespace KompasDropExport.UI.Tabs
                         return;
                     }
 
+                    lblStatus.Text = "Получаем открытые документы КОМПАС...";
                     var openPaths = host.GetOpenDocumentPaths();
-                    AddPathsToList(openPaths);
-                }
 
-                int added = listBoxFiles.Items.Count - before;
-                lblStatus.Text = added > 0
-                    ? $"Добавлено открытых документов: {added}."
-                    : "Сохранённые открытые документы не найдены.";
+                    if (openPaths.Count == 0)
+                    {
+                        lblStatus.Text = "Нет сохранённых открытых документов.";
+                        return;
+                    }
+
+                    int supportedCount = openPaths.Count(IsSupportedKompasFile);
+                    int added = AddPathsToList(openPaths);
+
+                    if (supportedCount == 0)
+                    {
+                        lblStatus.Text = "Среди открытых документов нет файлов .cdw/.spw/.m3d/.a3d.";
+                        return;
+                    }
+
+                    int skippedDuplicates = supportedCount - added;
+                    lblStatus.Text = skippedDuplicates > 0
+                        ? $"Добавлено открытых документов: {added}. Уже были в очереди: {skippedDuplicates}."
+                        : $"Добавлено открытых документов: {added}.";
+                }
             }
             catch (Exception ex)
             {
