@@ -36,7 +36,7 @@ namespace KompasDropExport.Utils
             // База: АШСД.556545.132
             // Суффикс (необязательный): СБ / Э5 / А1 / ... (1-3 буквы + 0-2 цифры), с пробелом или без
             var rx = new Regex(
-                   @"^[А-ЯA-Z]{3,10}\.\d{6}\.\d{3}" +   // база
+                   @"^[А-ЯA-Z]{4}\.\d{6}\.\d{3}" +   // база
                    @"(?:-\d{2})?" +                     // -01
                    @"(?:\s?[А-ЯA-Z]{1,3}\d{0,2})?$",    // СБ / Э5 / А1
                    RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
