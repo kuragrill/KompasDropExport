@@ -32,10 +32,12 @@ namespace KompasDropExport.UI.Tabs
             this.DragEnter += OnDragEnter;
             this.DragDrop += OnDragDrop;
 
+
             listBoxFiles.DragEnter += OnDragEnter;
             listBoxFiles.DragDrop += OnDragDrop;
+            listBoxFiles.KeyDown += listBoxFiles_KeyDown;
 
-  
+
 
             // Включаем owner draw для подсветки строк
             listBoxFiles.DrawMode = DrawMode.OwnerDrawFixed;
@@ -301,6 +303,54 @@ namespace KompasDropExport.UI.Tabs
             progress.Value = 0;
         }
 
+        private void RemoveSelectedFilesFromList()
+        {
+            if (listBoxFiles.SelectedItems == null || listBoxFiles.SelectedItems.Count == 0)
+                return;
+
+            var selectedPaths = new List<string>();
+
+            foreach (var item in listBoxFiles.SelectedItems)
+            {
+                var path = item?.ToString();
+                if (!string.IsNullOrWhiteSpace(path))
+                    selectedPaths.Add(path);
+            }
+
+            if (selectedPaths.Count == 0)
+                return;
+
+            for (int i = listBoxFiles.Items.Count - 1; i >= 0; i--)
+            {
+                var path = listBoxFiles.Items[i]?.ToString();
+                if (string.IsNullOrWhiteSpace(path))
+                    continue;
+
+                for (int j = 0; j < selectedPaths.Count; j++)
+                {
+                    if (string.Equals(path, selectedPaths[j], StringComparison.OrdinalIgnoreCase))
+                    {
+                        listBoxFiles.Items.RemoveAt(i);
+                        _pdfArchiveMiss.Remove(path);
+                        break;
+                    }
+                }
+            }
+
+            UpdateQueueLabel();
+            listBoxFiles.Invalidate();
+
+            if (listBoxFiles.Items.Count == 0)
+            {
+                lblStatus.Text = "Очередь пуста.";
+                progress.Value = 0;
+            }
+            else
+            {
+                lblStatus.Text = "Выделенные файлы удалены из очереди.";
+            }
+        }
+
         private void btnExportPdf_Click(object sender, EventArgs e)
         {
             var files = GetFilesFromListBox();
@@ -390,6 +440,17 @@ namespace KompasDropExport.UI.Tabs
                 // Если файл исчез/путь битый — мягко сообщим
                 MessageBox.Show("Файл не найден:\n" + path);
             }
+        }
+
+        private void listBoxFiles_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode != Keys.Delete)
+                return;
+
+            RemoveSelectedFilesFromList();
+
+            e.Handled = true;
+            e.SuppressKeyPress = true;
         }
     }
 }
