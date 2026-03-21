@@ -32,6 +32,7 @@
             this.progress = new KompasDropExport.UI.NiceProgressBar();
             this.tableLayoutPanel2 = new System.Windows.Forms.TableLayoutPanel();
             this.btnExportStep = new System.Windows.Forms.Button();
+            this.btnAddOpenDocs = new System.Windows.Forms.Button();
             this.btnClear = new System.Windows.Forms.Button();
             this.btnExportPdf = new System.Windows.Forms.Button();
             this.listBoxFiles = new System.Windows.Forms.ListBox();
@@ -104,12 +105,14 @@
             // tableLayoutPanel2
             // 
             this.tableLayoutPanel2.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.tableLayoutPanel2.ColumnCount = 3;
-            this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 33.33333F));
-            this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 33.33333F));
-            this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 33.33333F));
+            this.tableLayoutPanel2.ColumnCount = 4;
+            this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 25F));
+            this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 25F));
+            this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 25F));
+            this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 25F));
             this.tableLayoutPanel2.Controls.Add(this.btnExportStep, 1, 0);
-            this.tableLayoutPanel2.Controls.Add(this.btnClear, 2, 0);
+            this.tableLayoutPanel2.Controls.Add(this.btnAddOpenDocs, 2, 0);
+            this.tableLayoutPanel2.Controls.Add(this.btnClear, 3, 0);
             this.tableLayoutPanel2.Controls.Add(this.btnExportPdf, 0, 0);
             this.tableLayoutPanel2.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutPanel2.Location = new System.Drawing.Point(0, 448);
@@ -126,26 +129,41 @@
             // 
             this.btnExportStep.BackColor = System.Drawing.Color.DeepSkyBlue;
             this.btnExportStep.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.btnExportStep.Location = new System.Drawing.Point(400, 0);
+            this.btnExportStep.Location = new System.Drawing.Point(302, 0);
             this.btnExportStep.Margin = new System.Windows.Forms.Padding(7, 0, 7, 0);
             this.btnExportStep.Name = "btnExportStep";
             this.btnExportStep.Padding = new System.Windows.Forms.Padding(2);
-            this.btnExportStep.Size = new System.Drawing.Size(379, 50);
+            this.btnExportStep.Size = new System.Drawing.Size(281, 50);
             this.btnExportStep.TabIndex = 3;
             this.btnExportStep.Text = "Экспорт STEP";
             this.btnExportStep.UseVisualStyleBackColor = false;
             this.btnExportStep.Click += new System.EventHandler(this.btnExportStep_Click);
+            // 
+            // btnAddOpenDocs
+            // 
+            this.btnAddOpenDocs.BackColor = System.Drawing.Color.Gainsboro;
+            this.btnAddOpenDocs.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.btnAddOpenDocs.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnAddOpenDocs.Location = new System.Drawing.Point(597, 0);
+            this.btnAddOpenDocs.Margin = new System.Windows.Forms.Padding(7, 0, 7, 0);
+            this.btnAddOpenDocs.Name = "btnAddOpenDocs";
+            this.btnAddOpenDocs.Padding = new System.Windows.Forms.Padding(2);
+            this.btnAddOpenDocs.Size = new System.Drawing.Size(281, 50);
+            this.btnAddOpenDocs.TabIndex = 5;
+            this.btnAddOpenDocs.Text = "Добавить открытые";
+            this.btnAddOpenDocs.UseVisualStyleBackColor = false;
+            this.btnAddOpenDocs.Click += new System.EventHandler(this.btnAddOpenDocs_Click);
             // 
             // btnClear
             // 
             this.btnClear.BackColor = System.Drawing.Color.Gainsboro;
             this.btnClear.Dock = System.Windows.Forms.DockStyle.Fill;
             this.btnClear.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnClear.Location = new System.Drawing.Point(793, 0);
+            this.btnClear.Location = new System.Drawing.Point(892, 0);
             this.btnClear.Margin = new System.Windows.Forms.Padding(7, 0, 7, 0);
             this.btnClear.Name = "btnClear";
             this.btnClear.Padding = new System.Windows.Forms.Padding(2);
-            this.btnClear.Size = new System.Drawing.Size(381, 50);
+            this.btnClear.Size = new System.Drawing.Size(282, 50);
             this.btnClear.TabIndex = 2;
             this.btnClear.Text = "Очистить очередь";
             this.btnClear.UseVisualStyleBackColor = false;
@@ -159,7 +177,7 @@
             this.btnExportPdf.Margin = new System.Windows.Forms.Padding(7, 0, 7, 0);
             this.btnExportPdf.Name = "btnExportPdf";
             this.btnExportPdf.Padding = new System.Windows.Forms.Padding(2);
-            this.btnExportPdf.Size = new System.Drawing.Size(379, 50);
+            this.btnExportPdf.Size = new System.Drawing.Size(281, 50);
             this.btnExportPdf.TabIndex = 4;
             this.btnExportPdf.Text = "Экспорт PDF";
             this.btnExportPdf.UseVisualStyleBackColor = false;
@@ -428,6 +446,7 @@
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel1;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel2;
         private System.Windows.Forms.Button btnExportStep;
+        private System.Windows.Forms.Button btnAddOpenDocs;
         private System.Windows.Forms.Button btnClear;
         private System.Windows.Forms.Button btnExportPdf;
         private System.Windows.Forms.ListBox listBoxFiles;
