@@ -148,6 +148,9 @@ namespace KompasDropExport.UI.Tabs
 
         private void AddFile(string path)
         {
+            if (!IsSupportedKompasFile(path))
+                return;
+
             for (int i = 0; i < listBoxFiles.Items.Count; i++)
             {
                 if (string.Equals(listBoxFiles.Items[i]?.ToString(), path, StringComparison.OrdinalIgnoreCase))
@@ -155,6 +158,14 @@ namespace KompasDropExport.UI.Tabs
             }
 
             listBoxFiles.Items.Add(path);
+        }
+
+        private static bool IsSupportedKompasFile(string path)
+        {
+            return ExportRules.IsCdw(path) ||
+                   ExportRules.IsSpw(path) ||
+                   ExportRules.IsM3d(path) ||
+                   ExportRules.IsA3d(path);
         }
 
         private void UpdateQueueLabel()
