@@ -1,5 +1,9 @@
 ﻿using KompasAPI7;
 using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.IO;
+using System.Reflection;
 using System.Runtime.InteropServices;
 
 namespace KompasDropExport.Kompas
@@ -39,18 +43,8 @@ namespace KompasDropExport.Kompas
             if (_initialized) return;
 
             // 1) Пробуем зацепиться к существующему
-            try
-            {
-                App7 = (IApplication)Marshal.GetActiveObject("KOMPAS.Application.7");
-                App5 = App7;
-                IsAttachedToRunning = true;
-                _initialized = true;
+            if (TryAttachToRunning())
                 return;
-            }
-            catch
-            {
-                // ignored
-            }
 
             // 2) Иначе создаём новый
             var t = Type.GetTypeFromProgID("KOMPAS.Application.7");
@@ -86,6 +80,39 @@ namespace KompasDropExport.Kompas
         {
             AttachOrStart();
             return App7.Documents.Open(path, readOnly, visible);
+        }
+
+        public List<string> GetOpenDocumentPaths()
+        {
+            if (!TryAttachToRunning())
+                return new List<string>();
+
+            var result = new List<string>();
+            var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+            CollectOpenDocumentPaths(TryGetDocumentsCollection(App7), result, seen);
+            CollectOpenDocumentPaths(TryGetDocumentsCollection(App5), result, seen);
+
+            return result;
+        }
+
+        public bool TryAttachToRunning()
+        {
+            if (_initialized)
+                return IsAttachedToRunning;
+
+            try
+            {
+                App7 = (IApplication)Marshal.GetActiveObject("KOMPAS.Application.7");
+                App5 = App7;
+                IsAttachedToRunning = true;
+                _initialized = true;
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
         }
 
         /// <summary>
@@ -160,6 +187,140 @@ namespace KompasDropExport.Kompas
         private static void Try(Action a)
         {
             try { a(); } catch { }
+        }
+
+        private static object TryGetDocumentsCollection(object app)
+        {
+            if (app == null) return null;
+
+            try
+            {
+                return app.GetType().InvokeMember(
+                    "Documents",
+                    BindingFlags.GetProperty | BindingFlags.Public | BindingFlags.Instance,
+                    null,
+                    app,
+                    null);
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        private static void CollectOpenDocumentPaths(object documents, List<string> result, HashSet<string> seen)
+        {
+            if (documents == null || result == null || seen == null)
+                return;
+
+            foreach (var doc in EnumerateComCollection(documents))
+            {
+                var path = TryGetDocumentPath(doc);
+                if (string.IsNullOrWhiteSpace(path))
+                    continue;
+
+                if (!File.Exists(path))
+                    continue;
+
+                if (seen.Add(path))
+                    result.Add(path);
+            }
+        }
+
+        private static IEnumerable<object> EnumerateComCollection(object collection)
+        {
+            if (collection == null)
+                yield break;
+
+            var enumerable = collection as IEnumerable;
+            if (enumerable != null)
+            {
+                foreach (var item in enumerable)
+                    yield return item;
+
+                yield break;
+            }
+
+            int count = TryGetCollectionCount(collection);
+            for (int i = 0; i < count; i++)
+            {
+                object item = TryGetCollectionItem(collection, i) ?? TryGetCollectionItem(collection, i + 1);
+                if (item != null)
+                    yield return item;
+            }
+        }
+
+        private static int TryGetCollectionCount(object collection)
+        {
+            if (collection == null) return 0;
+
+            foreach (var propName in new[] { "Count", "DocumentCount" })
+            {
+                try
+                {
+                    object value = collection.GetType().InvokeMember(
+                        propName,
+                        BindingFlags.GetProperty | BindingFlags.Public | BindingFlags.Instance,
+                        null,
+                        collection,
+                        null);
+
+                    if (value != null)
+                        return Convert.ToInt32(value);
+                }
+                catch
+                {
+                }
+            }
+
+            return 0;
+        }
+
+        private static object TryGetCollectionItem(object collection, int index)
+        {
+            if (collection == null) return null;
+
+            try
+            {
+                return collection.GetType().InvokeMember(
+                    "Item",
+                    BindingFlags.GetProperty | BindingFlags.Public | BindingFlags.Instance,
+                    null,
+                    collection,
+                    new object[] { index });
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        private static string TryGetDocumentPath(object doc)
+        {
+            if (doc == null)
+                return null;
+
+            foreach (var propName in new[] { "PathName", "FullName", "FullFileName", "FileName" })
+            {
+                try
+                {
+                    object value = doc.GetType().InvokeMember(
+                        propName,
+                        BindingFlags.GetProperty | BindingFlags.Public | BindingFlags.Instance,
+                        null,
+                        doc,
+                        null);
+
+                    string path = Convert.ToString(value);
+                    if (!string.IsNullOrWhiteSpace(path))
+                        return path;
+                }
+                catch
+                {
+                }
+            }
+
+            return null;
         }
 
         private static void ReleaseCom(object obj)
