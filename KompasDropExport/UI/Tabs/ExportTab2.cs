@@ -1,4 +1,5 @@
 ﻿using KompasDropExport.Domain;
+using KompasDropExport.Kompas;
 using KompasDropExport.Services;
 using System;
 using System.Collections.Generic;
@@ -46,6 +47,7 @@ namespace KompasDropExport.UI.Tabs
 
             UiStyle.ApplySoftButton(btnExportPdf);
             UiStyle.ApplySoftButton(btnExportStep);
+            UiStyle.ApplySoftButton(btnAddOpenDocs);
             UiStyle.ApplySoftButton(btnClear);
 
 
@@ -148,6 +150,9 @@ namespace KompasDropExport.UI.Tabs
 
         private void AddFile(string path)
         {
+            if (!IsSupportedKompasFile(path))
+                return;
+
             for (int i = 0; i < listBoxFiles.Items.Count; i++)
             {
                 if (string.Equals(listBoxFiles.Items[i]?.ToString(), path, StringComparison.OrdinalIgnoreCase))
@@ -155,6 +160,14 @@ namespace KompasDropExport.UI.Tabs
             }
 
             listBoxFiles.Items.Add(path);
+        }
+
+        private static bool IsSupportedKompasFile(string path)
+        {
+            return ExportRules.IsCdw(path) ||
+                   ExportRules.IsSpw(path) ||
+                   ExportRules.IsM3d(path) ||
+                   ExportRules.IsA3d(path);
         }
 
         private void UpdateQueueLabel()
@@ -207,6 +220,7 @@ namespace KompasDropExport.UI.Tabs
         {
             btnExportPdf.Enabled = enable;
             btnExportStep.Enabled = enable;
+            btnAddOpenDocs.Enabled = enable;
             btnClear.Enabled = enable;
 
             cbPdfExcludeAsm.Enabled = enable;
@@ -288,6 +302,35 @@ namespace KompasDropExport.UI.Tabs
             UpdateQueueLabel();
             lblStatus.Text = "Очередь очищена.";
             progress.Value = 0;
+        }
+
+        private void btnAddOpenDocs_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                int before = listBoxFiles.Items.Count;
+
+                using (var host = new KompasHost())
+                {
+                    if (!host.TryAttachToRunning())
+                    {
+                        lblStatus.Text = "Открытый КОМПАС не найден.";
+                        return;
+                    }
+
+                    var openPaths = host.GetOpenDocumentPaths();
+                    AddPathsToList(openPaths);
+                }
+
+                int added = listBoxFiles.Items.Count - before;
+                lblStatus.Text = added > 0
+                    ? $"Добавлено открытых документов: {added}."
+                    : "Сохранённые открытые документы не найдены.";
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Не удалось получить список открытых документов КОМПАС:\n" + ex.Message);
+            }
         }
 
         private void btnExportPdf_Click(object sender, EventArgs e)
