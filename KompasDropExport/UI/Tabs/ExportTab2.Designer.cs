@@ -29,6 +29,7 @@
         private void InitializeComponent()
         {
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
+            this.progress = new KompasDropExport.UI.NiceProgressBar();
             this.tableLayoutPanel2 = new System.Windows.Forms.TableLayoutPanel();
             this.btnExportStep = new System.Windows.Forms.Button();
             this.btnAddOpenDocs = new System.Windows.Forms.Button();
@@ -51,7 +52,6 @@
             this.cbStepExcludeOther = new System.Windows.Forms.CheckBox();
             this.cbStepExcludeAsm = new System.Windows.Forms.CheckBox();
             this.lblStatus = new System.Windows.Forms.Label();
-            this.progress = new KompasDropExport.UI.NiceProgressBar();
             this.tableLayoutPanel1.SuspendLayout();
             this.tableLayoutPanel2.SuspendLayout();
             this.tableLayoutPanel3.SuspendLayout();
@@ -84,6 +84,23 @@
             this.tableLayoutPanel1.Size = new System.Drawing.Size(1181, 598);
             this.tableLayoutPanel1.TabIndex = 3;
             this.tableLayoutPanel1.Paint += new System.Windows.Forms.PaintEventHandler(this.tableLayoutPanel1_Paint);
+            // 
+            // progress
+            // 
+            this.progress.BackBarColor = System.Drawing.Color.LightGray;
+            this.progress.BarColor = System.Drawing.Color.DeepSkyBlue;
+            this.progress.BorderColor = System.Drawing.Color.Gray;
+            this.progress.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.progress.Location = new System.Drawing.Point(7, 501);
+            this.progress.Margin = new System.Windows.Forms.Padding(7, 3, 7, 3);
+            this.progress.Maximum = 100;
+            this.progress.Minimum = 0;
+            this.progress.Name = "progress";
+            this.progress.Size = new System.Drawing.Size(1167, 34);
+            this.progress.TabIndex = 9;
+            this.progress.Text = "niceProgressBar1";
+            this.progress.TextColor = System.Drawing.Color.Black;
+            this.progress.Value = 0;
             // 
             // tableLayoutPanel2
             // 
@@ -175,10 +192,12 @@
             this.listBoxFiles.Location = new System.Drawing.Point(4, 3);
             this.listBoxFiles.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.listBoxFiles.Name = "listBoxFiles";
+            this.listBoxFiles.SelectionMode = System.Windows.Forms.SelectionMode.MultiExtended;
             this.listBoxFiles.Size = new System.Drawing.Size(1173, 276);
             this.listBoxFiles.TabIndex = 0;
             this.listBoxFiles.SelectedIndexChanged += new System.EventHandler(this.listBox1_SelectedIndexChanged);
             this.listBoxFiles.DoubleClick += new System.EventHandler(this.listBoxFiles_DoubleClick);
+            this.listBoxFiles.KeyDown += new System.Windows.Forms.KeyEventHandler(this.listBoxFiles_KeyDown);
             // 
             // lblQueue
             // 
@@ -401,23 +420,6 @@
             this.lblStatus.Size = new System.Drawing.Size(450, 26);
             this.lblStatus.TabIndex = 8;
             this.lblStatus.Text = "Перетащите файлы/папки: .cdw, .spw, .m3d, .a3d.\"";
-            // 
-            // progress
-            // 
-            this.progress.BackBarColor = System.Drawing.Color.LightGray;
-            this.progress.BarColor = System.Drawing.Color.DeepSkyBlue;
-            this.progress.BorderColor = System.Drawing.Color.Gray;
-            this.progress.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.progress.Location = new System.Drawing.Point(7, 501);
-            this.progress.Margin = new System.Windows.Forms.Padding(7, 3, 7, 3);
-            this.progress.Maximum = 100;
-            this.progress.Minimum = 0;
-            this.progress.Name = "progress";
-            this.progress.Size = new System.Drawing.Size(1167, 34);
-            this.progress.TabIndex = 9;
-            this.progress.Text = "niceProgressBar1";
-            this.progress.TextColor = System.Drawing.Color.Black;
-            this.progress.Value = 0;
             // 
             // ExportTab2
             // 

@@ -33,10 +33,12 @@ namespace KompasDropExport.UI.Tabs
             this.DragEnter += OnDragEnter;
             this.DragDrop += OnDragDrop;
 
+
             listBoxFiles.DragEnter += OnDragEnter;
             listBoxFiles.DragDrop += OnDragDrop;
+            listBoxFiles.KeyDown += listBoxFiles_KeyDown;
 
-  
+
 
             // Включаем owner draw для подсветки строк
             listBoxFiles.DrawMode = DrawMode.OwnerDrawFixed;
@@ -416,6 +418,17 @@ namespace KompasDropExport.UI.Tabs
                 // Если файл исчез/путь битый — мягко сообщим
                 MessageBox.Show("Файл не найден:\n" + path);
             }
+        }
+
+        private void listBoxFiles_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode != Keys.Delete)
+                return;
+
+            RemoveSelectedFilesFromList();
+
+            e.Handled = true;
+            e.SuppressKeyPress = true;
         }
     }
 }
