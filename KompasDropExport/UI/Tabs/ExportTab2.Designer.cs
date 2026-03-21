@@ -414,10 +414,11 @@
             // 
             // lblStatus
             // 
+            this.lblStatus.Dock = System.Windows.Forms.DockStyle.Fill;
             this.lblStatus.Location = new System.Drawing.Point(2, 540);
             this.lblStatus.Margin = new System.Windows.Forms.Padding(2);
             this.lblStatus.Name = "lblStatus";
-            this.lblStatus.Size = new System.Drawing.Size(450, 26);
+            this.lblStatus.Size = new System.Drawing.Size(1177, 56);
             this.lblStatus.TabIndex = 8;
             this.lblStatus.Text = "Перетащите файлы/папки: .cdw, .spw, .m3d, .a3d.\"";
             // 
