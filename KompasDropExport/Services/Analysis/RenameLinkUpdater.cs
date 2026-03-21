@@ -37,6 +37,16 @@ namespace KompasDropExport.Services.Analysis
     /// - composition и attached docs обновляются только при наличии совпадений в renameMap
     /// - документ сохраняется только если были реальные изменения
     /// </summary>
+    ///В RenameLinkUpdater заработало обновление ссылок внутри спецификации по пути
+    //SPW -> SpecificationDescriptions -> BaseObjects -> AttachedDocuments.
+    //Причина неработоспособности была в обходе COM-коллекций через IEnumerable; рабочий вариант — только через Count + Item(...) с поддержкой 0 / 1 - based индексации.
+    //Замена выполняется через attachedItem.Delete() + attachedDocs.Add(newPath, true).
+    
+
+
+
+
+
     public sealed class RenameLinkUpdater
     {
         public sealed class RenameLinkUpdateResult
