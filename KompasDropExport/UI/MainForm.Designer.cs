@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
             this.TabControl = new System.Windows.Forms.TabControl();
             this.Export_new = new System.Windows.Forms.TabPage();
             this.exportTab22 = new KompasDropExport.UI.Tabs.ExportTab2();
@@ -35,10 +36,13 @@
             this.tableTab1 = new KompasDropExport.UI.Tabs.TableTab();
             this.BOM = new System.Windows.Forms.TabPage();
             this.graphTab1 = new KompasDropExport.UI.Tabs.GraphTab();
+            this.help = new System.Windows.Forms.TabPage();
+            this.textBox1 = new System.Windows.Forms.TextBox();
             this.TabControl.SuspendLayout();
             this.Export_new.SuspendLayout();
             this.TableTab.SuspendLayout();
             this.BOM.SuspendLayout();
+            this.help.SuspendLayout();
             this.SuspendLayout();
             // 
             // TabControl
@@ -47,6 +51,7 @@
             this.TabControl.Controls.Add(this.Export_new);
             this.TabControl.Controls.Add(this.TableTab);
             this.TabControl.Controls.Add(this.BOM);
+            this.TabControl.Controls.Add(this.help);
             this.TabControl.Dock = System.Windows.Forms.DockStyle.Fill;
             this.TabControl.Location = new System.Drawing.Point(0, 0);
             this.TabControl.Margin = new System.Windows.Forms.Padding(4);
@@ -64,7 +69,7 @@
             this.Export_new.Padding = new System.Windows.Forms.Padding(4);
             this.Export_new.Size = new System.Drawing.Size(1605, 757);
             this.Export_new.TabIndex = 3;
-            this.Export_new.Text = "Сохранение PDF, STEP";
+            this.Export_new.Text = "Экспорт PDF, STEP";
             this.Export_new.UseVisualStyleBackColor = true;
             // 
             // exportTab22
@@ -123,6 +128,29 @@
             this.graphTab1.Size = new System.Drawing.Size(1597, 749);
             this.graphTab1.TabIndex = 0;
             // 
+            // help
+            // 
+            this.help.Controls.Add(this.textBox1);
+            this.help.Location = new System.Drawing.Point(8, 39);
+            this.help.Name = "help";
+            this.help.Padding = new System.Windows.Forms.Padding(3);
+            this.help.Size = new System.Drawing.Size(1605, 757);
+            this.help.TabIndex = 4;
+            this.help.Text = "Справка";
+            this.help.UseVisualStyleBackColor = true;
+            // 
+            // textBox1
+            // 
+            this.textBox1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.textBox1.Location = new System.Drawing.Point(3, 3);
+            this.textBox1.Multiline = true;
+            this.textBox1.Name = "textBox1";
+            this.textBox1.ReadOnly = true;
+            this.textBox1.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
+            this.textBox1.Size = new System.Drawing.Size(1599, 751);
+            this.textBox1.TabIndex = 0;
+            this.textBox1.Text = resources.GetString("textBox1.Text");
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(12F, 25F);
@@ -136,6 +164,8 @@
             this.Export_new.ResumeLayout(false);
             this.TableTab.ResumeLayout(false);
             this.BOM.ResumeLayout(false);
+            this.help.ResumeLayout(false);
+            this.help.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -150,5 +180,7 @@
         private Tabs.ExportTab2 exportTab22;
         private Tabs.TableTab tableTab1;
         private Tabs.GraphTab graphTab1;
+        private System.Windows.Forms.TabPage help;
+        private System.Windows.Forms.TextBox textBox1;
     }
 }

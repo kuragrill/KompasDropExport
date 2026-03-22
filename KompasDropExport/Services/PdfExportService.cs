@@ -30,9 +30,7 @@ namespace KompasDropExport.Services
             {
                 host.AttachOrStart();
 
-                stage?.Invoke(host.IsOwnInstance
-                    ? "Запущен новый экземпляр КОМПАС…"
-                    : "Подключение к уже запущенному КОМПАС…");
+                stage?.Invoke("Запущен отдельный экземпляр КОМПАС…");
 
                 var reader = new KompasPropertyReader(host.App7);
 
@@ -135,6 +133,7 @@ namespace KompasDropExport.Services
             }
             catch
             {
+                TryDeleteFile(outPdf);
                 return false;
             }
         }
@@ -150,22 +149,14 @@ namespace KompasDropExport.Services
                 pj = host.App5.PrintJob;
                 Try(() => pj.Clear());
 
-                bool added = false;
-                try { pj.AddSheets(doc); added = true; } catch { }
-
-                if (!added)
+                try { pj.AddSheets(doc); }
+                catch
                 {
-                    // запасной вариант: через ActiveDocument
-                    try
-                    {
-                        Try(() => doc.Activate());
-                        pj.AddSheets(host.App5.ActiveDocument);
-                        added = true;
-                    }
-                    catch { }
+                    Try(() => pj.Clear());
+                    return false;
                 }
 
-                if (!added) return false;
+              
 
                 Try(() => pj.PlotToFile = true);
                 Try(() => pj.FileName = outPdf);
@@ -181,10 +172,19 @@ namespace KompasDropExport.Services
 
                 Try(() => pj.Clear());
 
-                return executed;
+                if (!executed)
+                {
+                    TryDeleteFile(outPdf);
+                    return false;
+                }
+
+                return File.Exists(outPdf);
+
+
             }
             catch
             {
+                TryDeleteFile(outPdf);
                 return false;
             }
             finally
@@ -216,6 +216,18 @@ namespace KompasDropExport.Services
         private static void Try(Action a)
         {
             try { a(); } catch { }
+        }
+
+
+        private static void TryDeleteFile(string path)
+        {
+            if (string.IsNullOrWhiteSpace(path)) return;
+            try
+            {
+                if (File.Exists(path))
+                    File.Delete(path);
+            }
+            catch { }
         }
     }
 }

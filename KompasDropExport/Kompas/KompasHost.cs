@@ -42,11 +42,7 @@ namespace KompasDropExport.Kompas
         {
             if (_initialized) return;
 
-            // 1) Пробуем зацепиться к существующему
-            if (TryAttachToRunning())
-                return;
-
-            // 2) Иначе создаём новый
+            // Для рабочих операций всегда создаём отдельный экземпляр.
             var t = Type.GetTypeFromProgID("KOMPAS.Application.7");
             if (t == null) throw new InvalidOperationException("Не найден ProgID KOMPAS.Application.7");
 
@@ -168,6 +164,7 @@ namespace KompasDropExport.Kompas
             // закрываем только свой экземпляр
             if (IsOwnInstance && App5 != null)
             {
+                TryCloseAllDocuments();
                 Try(() => App5.Quit()); // это dynamic-вызов, но он внутри Try, пусть падает и гасится
             }
 
@@ -340,6 +337,23 @@ namespace KompasDropExport.Kompas
             }
             catch { }
         }
+
+        private void TryCloseAllDocuments()
+        {
+            foreach (var documents in new[] { TryGetDocumentsCollection(App7), TryGetDocumentsCollection(App5) })
+            {
+                foreach (var doc in EnumerateComCollection(documents))
+                {
+                    try { doc.Close(false); }
+                    catch { }
+                    finally
+                    {
+                        ReleaseCom(doc);
+                    }
+                }
+            }
+        }
+
 
         private sealed class Scope : IDisposable
         {

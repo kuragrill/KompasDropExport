@@ -17,7 +17,7 @@ namespace KompasDropExport.UI
 
             InitializeComponent();
 
-            this.Text = "Funny KOMPAS: Drag&Drop Export, Rename & Doctor";
+            this.Text = "Funny KOMPAS: Drag&Drop Export, Rename & Doctor ver. 0.95";
         }
 
 
