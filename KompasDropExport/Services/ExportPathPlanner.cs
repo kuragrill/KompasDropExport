@@ -24,6 +24,12 @@ namespace KompasDropExport.Services
             return Path.GetFileNameWithoutExtension(srcPath) ?? "noname";
         }
 
+        public string MakeWorkBaseName(string srcPath, string suffix)
+        {
+            string baseName = MakeWorkBaseName(srcPath);
+            return AppendSuffix(baseName, suffix);
+        }
+
         public bool ShouldWriteArchive(string marking)
         {
             return ExportRules.IsArchiveEligible(marking);
@@ -38,6 +44,36 @@ namespace KompasDropExport.Services
 
             string s = (m + Sep(sep) + n).Trim();
             return SanitizeFileName(s);
+        }
+
+        public string MakeArchiveBaseName(string marking, string name, string suffix, NameSeparator sep)
+        {
+            string m = (marking ?? "").Trim();
+            if (string.IsNullOrWhiteSpace(m)) return null;
+
+            m = AppendSuffix(m, suffix);
+
+            string n = (name ?? "").Trim();
+
+            string s = string.IsNullOrWhiteSpace(n)
+                ? m
+                : (m + Sep(sep) + n).Trim();
+
+            return SanitizeFileName(s);
+        }
+
+        private static string AppendSuffix(string value, string suffix)
+        {
+            string v = (value ?? "").Trim();
+            string s = (suffix ?? "").Trim();
+
+            if (string.IsNullOrWhiteSpace(s))
+                return v;
+
+            if (string.IsNullOrWhiteSpace(v))
+                return s;
+
+            return v + s;
         }
 
         private static string SanitizeFileName(string s)

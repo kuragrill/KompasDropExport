@@ -130,6 +130,11 @@ namespace KompasDropExport.UI.Tabs
 
             foreach (var f in FileCollector.Collect3DFiles(paths).Distinct(StringComparer.OrdinalIgnoreCase))
             {
+                if (cbStepExcludeTrash.Checked &&
+                f.Split(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar)
+                 .Any(part => string.Equals(part, "TRASH", StringComparison.OrdinalIgnoreCase)))
+                    continue;
+
                 var fileName = Path.GetFileName(f);
 
                 if (ShouldSkipByName(fileName))

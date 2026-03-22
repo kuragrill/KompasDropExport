@@ -49,6 +49,8 @@ namespace KompasDropExport.UI.Tabs
             UiStyle.ApplySoftButton(btnAddOpenDocs);
             UiStyle.ApplySoftButton(btnClear);
 
+            UpdateQueueLabel();
+
 
         }
 
