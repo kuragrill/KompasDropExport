@@ -134,7 +134,7 @@ namespace KompasDropExport.Services
                                 TryRefreshDocumentAfterEmbodimentSwitch(doc);
 
                                 var nm = reader.Read3D(doc);
-                                string suffix = NormalizeExecSuffix(nm.Marking);
+                                string suffix = BuildEmbodimentSuffix(nm.Marking, baseMarking, embIndex);
 
           
 
@@ -361,21 +361,53 @@ namespace KompasDropExport.Services
             catch { }
         }
 
-        private static string NormalizeExecSuffix(string marking)
+        private static string BuildEmbodimentSuffix(string currentMarking, string baseMarking, int embIndex)
+        {
+            // 1) Прямой суффикс вида "-01"
+            string direct = ExtractDashNumberSuffix(currentMarking);
+            if (!string.IsNullOrWhiteSpace(direct))
+                return direct;
+
+            // 2) Если текущее обозначение начинается с базового, берём хвост после базы.
+            string cur = (currentMarking ?? string.Empty).Trim();
+            string bas = (baseMarking ?? string.Empty).Trim();
+            if (!string.IsNullOrWhiteSpace(cur) && !string.IsNullOrWhiteSpace(bas)
+                && cur.Length > bas.Length
+                && cur.StartsWith(bas, StringComparison.OrdinalIgnoreCase))
+            {
+                string tail = cur.Substring(bas.Length).Trim();
+                string fromTail = ExtractDashNumberSuffix(tail);
+                if (!string.IsNullOrWhiteSpace(fromTail))
+                    return fromTail;
+            }
+
+            // 3) Безопасный fallback, чтобы исполнения не перетирали друг друга.
+            return $"-E{embIndex + 1:D2}";
+        }
+
+        private static string ExtractDashNumberSuffix(string marking)
         {
             if (string.IsNullOrWhiteSpace(marking))
                 return null;
 
             string s = marking.Trim();
 
-            // Интересуют именно suffix-исполнения вида -01 / -02 / ...
-            if (!s.StartsWith("-"))
-                return null;
+            for (int i = 0; i + 2 < s.Length; i++)
+            {
+                if (s[i] != '-')
+                    continue;
 
-            foreach (char c in Path.GetInvalidFileNameChars())
-                s = s.Replace(c, '_');
+                if (!char.IsDigit(s[i + 1]) || !char.IsDigit(s[i + 2]))
+                    continue;
 
-            return s;
+                string suffix = s.Substring(i, 3);
+                foreach (char c in Path.GetInvalidFileNameChars())
+                    suffix = suffix.Replace(c, '_');
+
+                return suffix;
+            }
+
+            return null;
         }
 
         private static string ResolveBaseMarking(string sourcePath, string markingFromProperties)
