@@ -382,6 +382,10 @@ namespace KompasDropExport.Services
             }
 
             // 3) Безопасный fallback, чтобы исполнения не перетирали друг друга.
+            // Для базового (нулевого) исполнения суффикс не добавляем.
+            if (embIndex <= 0)
+                return null;
+
             return $"-E{embIndex + 1:D2}";
         }
 
