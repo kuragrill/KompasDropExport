@@ -1,6 +1,7 @@
 ﻿using KompasDropExport.Domain;
 using KompasDropExport.Kompas;
 using KompasDropExport.Utils;
+using KompasAPI7;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -71,8 +72,30 @@ namespace KompasDropExport.Services
                                 continue;
                             }
 
-                            int embodimentCount = TryGetEmbodimentCount(doc);
-                            int originalIndex = TryGetCurrentEmbodimentIndex(doc);
+                            var embMgr = TryGetEmbodimentsManager(doc);
+                            int embodimentCount = TryGetEmbodimentCount(doc, embMgr);
+                            int originalIndex = TryGetCurrentEmbodimentIndex(doc, embMgr);
+
+                            // На некоторых версиях/режимах КОМПАС переключение исполнений недоступно в read-only.
+                            // Если исполнений > 1, но переключиться нельзя — переоткрываем writable-режимом.
+                            if (embodimentCount > 1)
+                            {
+                                bool canSwitch = TrySetCurrentEmbodiment(doc, embMgr, originalIndex >= 0 ? originalIndex : 0);
+                                if (!canSwitch)
+                                {
+                                    SafeCloseAndRelease(doc);
+                                    doc = host.OpenDocument7(path, readOnly: false, visible: false);
+                                    if (doc == null)
+                                    {
+                                        err++;
+                                        continue;
+                                    }
+
+                                    embMgr = TryGetEmbodimentsManager(doc);
+                                    embodimentCount = TryGetEmbodimentCount(doc, embMgr);
+                                    originalIndex = TryGetCurrentEmbodimentIndex(doc, embMgr);
+                                }
+                            }
 
                             // Читаем базовые свойства в исходном состоянии документа.
                             var baseNm = reader.Read3D(doc);
@@ -104,7 +127,7 @@ namespace KompasDropExport.Services
 
                             for (int embIndex = 0; embIndex < embodimentCount; embIndex++)
                             {
-                                bool switched = TrySetCurrentEmbodiment(doc, embIndex);
+                                bool switched = TrySetCurrentEmbodiment(doc, embMgr, embIndex);
                                 if (!switched)
                                     continue;
 
@@ -134,7 +157,7 @@ namespace KompasDropExport.Services
 
                             // Возвращаем исходное исполнение.
                             if (originalIndex >= 0)
-                                TrySetCurrentEmbodiment(doc, originalIndex);
+                                TrySetCurrentEmbodiment(doc, embMgr, originalIndex);
 
                             // Если почему-то ни одного suffix-исполнения не нашли — fallback на обычный экспорт.
                             if (!anyStateExported)
@@ -255,24 +278,59 @@ namespace KompasDropExport.Services
             }
         }
 
-        private static int TryGetEmbodimentCount(dynamic doc)
+        private static IEmbodimentsManager TryGetEmbodimentsManager(dynamic doc)
         {
+            if (doc == null) return null;
+
+            try { return (IEmbodimentsManager)doc; } catch { }
+
+            try
+            {
+                var d3 = (IKompasDocument3D)doc;
+                if (d3 != null)
+                    return (IEmbodimentsManager)d3;
+            }
+            catch { }
+
+            return null;
+        }
+
+        private static int TryGetEmbodimentCount(dynamic doc, IEmbodimentsManager embMgr)
+        {
+            if (embMgr != null)
+            {
+                try { return Convert.ToInt32(embMgr.EmbodimentCount); } catch { }
+            }
+
             if (doc == null) return 0;
 
             try { return Convert.ToInt32(doc.EmbodimentCount); }
             catch { return 0; }
         }
 
-        private static int TryGetCurrentEmbodimentIndex(dynamic doc)
+        private static int TryGetCurrentEmbodimentIndex(dynamic doc, IEmbodimentsManager embMgr)
         {
+            if (embMgr != null)
+            {
+                try { return Convert.ToInt32(embMgr.CurrentEmbodimentIndex); } catch { }
+            }
+
             if (doc == null) return -1;
 
             try { return Convert.ToInt32(doc.CurrentEmbodimentIndex); }
             catch { return -1; }
         }
 
-        private static bool TrySetCurrentEmbodiment(dynamic doc, int index)
+        private static bool TrySetCurrentEmbodiment(dynamic doc, IEmbodimentsManager embMgr, int index)
         {
+            if (index < 0) return false;
+
+            if (embMgr != null)
+            {
+                try { return embMgr.SetCurrentEmbodiment(index); } catch { }
+                try { return embMgr.SetCurrentEmbodiment((object)index); } catch { }
+            }
+
             if (doc == null) return false;
 
             try
